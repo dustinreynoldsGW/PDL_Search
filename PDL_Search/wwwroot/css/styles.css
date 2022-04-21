@@ -1,0 +1,48 @@
+﻿.pdl-background-color {
+    background: #274463; 
+}
+
+.pdl-header{
+    color: #fff!important;
+    font-family:sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 30px;
+}
+
+.pdl-row {
+    padding-top: 5px;
+    padding-bottom: 2px;
+    padding-left: 20px;
+}
+
+.body-border {
+    border: 1px solid;
+    border-color: gray;
+    padding-left: 40px;
+}
+
+.body-border-padding{
+    padding-left: 40px;
+    padding-top: 20px;
+}
+
+.navbar-background-color{
+    background: #000000;
+}
+
+.body-form-padding{
+    padding-bottom: 1%;
+}
+
+.navbar-nav .nav-item .nav-link {
+    color:aqua;
+}
+.navbar-nav .nav-item.active .nav-link,
+.navbar-nav .nav-item:hover .nav-link {
+    color: pink;
+}
+
+ul.nav a:hover {
+    color: #fff !important;
+}

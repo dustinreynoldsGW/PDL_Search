@@ -1,0 +1,201 @@
+﻿@model PDL_Search.Models.DrugModel;
+
+@{
+    ViewData["Title"] = "PDL Searchable Database";
+}
+
+<link href="~/css/site.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/css/table-sortable.css" />
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.unobtrusive-ajax.js"></script>
+<script src="~/lib/jquery-mask/jquery.mask.min.js"></script>
+<script src="~/js/table-sortable.js"></script>
+<script src="~/js/data.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+<link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+<link href="~/lib/bootstrap/dist/css/bootstrap-grid.css" rel="stylesheet" />
+<script>
+    var aryDrugList;
+</script>
+
+<div class="row body-content" id="main" tabindex="-1" style="padding:20px 20px 20px 20px;margin-bottom:80px;">
+
+    <div id="wait" style="display: none;">
+        <img style="width:100px;height:100px" src="/Content/Images/spin.gif">
+    </div>
+
+    <form id="formPDLSearch">
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+
+        <fieldset>
+            <h2 class="padding-1">
+                PDL and DSP Product Search
+            </h2>
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-3">
+                    <label name="lblNdcCode" for="ndcCode">
+                        NDC Code:
+                    </label>
+
+                    @Html.EditorFor(model => model.NDC, new { @class = "form-text form-control text-box single-line", style = "", placeholder = "###########" })
+                    @*<input alt="Must enter 11 digits" class="form-text form-control text-box single-line" id="ndcCode" onkeyup="ValidateNDC() maxlength="11" name="NDC"  size="30" title="Must enter 11 digits" type="text" value="">*@
+                    <span class="field-validation-valid" data-valmsg-for="NDC" data-valmsg-replace="true" id="ndcCodeErrorMsgLbl" name="lblNdcCodeErrorMsg"></span>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-3">
+                    <label name="lblBrandName" for="brandName">
+                        Brand Name:
+                    </label>
+                    @Html.EditorFor(model => model.BrandName, new { @class = "form-text form-control text-box single-line", style = "", placeholder = "" })
+                    @*<input alt="Enter Brand Name of drug" class="form-text form-control text-box single-line" data-val="true" data-val-length="The field LabelName must be a string with a minimum length of 3 and a maximum length of 30." data-val-length-max="30" data-val-length-min="3" id="brandName" maxlength="30" name="LabelName" onkeyup="ValidateBrandName()" size="30" title="Enter Brand Name of drug" type="text" value="">                    <span class="field-validation-valid" data-valmsg-for="LabelName" data-valmsg-replace="true" id="brandNameErrorMsgLbl" name="lblBrandNameErrorMsg"></span>*@
+
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-3">
+                    <label name="lblGenericName" for="genericName">
+                        Generic Name:
+                    </label>
+                    @Html.EditorFor(model => model.GenericName, new { @class = "form-text form-control text-box single-line", style = "", placeholder = "" })
+                    @*<input alt="Enter Generic Name of drug" class="form-text form-control text-box single-line" data-val="true" data-val-length="The field GenericName must be a string with a minimum length of 3 and a maximum length of 60." data-val-length-max="60" data-val-length-min="3" id="genericName" maxlength="60" name="GenericName" onkeyup="ValidateGenericName()" size="60" title="Enter Generic Name of drug" type="text" value="">                    <span class="field-validation-valid" data-valmsg-for="GenericName" data-valmsg-replace="true" id="genericNameErrorMsgLbl" name="lblGenericNameErrorMsg"></span>*@
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 col-sm-6 col-xs-6">
+                    <label name="lblPdlClass" for="pdlClass">
+                        Class:
+                    </label>
+                    @Html.DropDownListFor(model => model.DrugClass,PDL_Search.Classes.DBFunctions.GetClassList(), new { @class = "form-select form-control show-tick", style = ""})
+                    @*<select alt="Select Preferred Drug List Class that drug is included in" class="form-select form-control show-tick" id="pdlClass" name="PDLClass" title="Select Preferred Drug List Class that drug is included in">
+                        <option value="" title="-Any Class-">-Any Class-</option>
+                        @Html.Raw(PDL_Search.Classes.DBFunctions.GetDrugClassDropdown())
+                    </select>*@
+                    <span class="field-validation-valid text-danger" data-valmsg-for="PDLClass" data-valmsg-replace="true" id="classErrorMsgLbl" name="lblPdlClassErrorMsg"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-3">
+                    <label name="lblSearchDate" for="searchDate">
+                        Date:
+                    </label>
+
+                    <div class="form-group">
+                        <div class="input-group date" data-date-format="mm-dd-yyyy">
+                            @Html.EditorFor(model => model.SearchDate, new { @class = "form-text form-control text-box single-line", style = "", placeholder = "" })
+                            @*<input alt="Select specific date for search" class="form-control text-box single-line" id="searchDate" name="Date" onkeyup="ValidateDateField()" title="Select specific date for search" type="text" value="04/18/2022">*@
+                            <span id="calendar-icon" class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                        </div>
+                    </div>
+
+                    <span class="field-validation-valid text-danger" data-valmsg-for="PDLClass" data-valmsg-replace="true" id="classErrorMsgLbl" name="lblPdlClassErrorMsg"></span>
+                    <label name="lblSearchDateErrorMsg" for="searchDate" id="searchDateErrorMsgLbl"></label>
+                </div>
+            </div>
+            <input type="hidden" id="hdnSession" class="hidden" data-value="">
+
+            <div class="row">
+                <label name="lblCaptcha" class="col-md-6 col-sm-6 col-xs-6" id="errorMsgLbl"></label>
+            </div>
+            <div class="row">
+                <div class="col-md-6 col-sm-6 col-xs-6">
+                    <input name="btnSearch" class="btn-primary btn form-submit" id="btnSearch" type="button" onkeydown="" alt="Search for Brand/Generic Name of drug" title="Search for Brand/Generic Name of drug" value="Search">
+                    <input name="btnClear" class="btn-secondary btn" id="btnClear" type="submit" alt="Clear Search field" title="Clear Search field" value="Clear">
+                </div>
+            </div>
+            <div class="row text-center">
+                <label name="lblNotFoundErrorMsg" id="notFoundErrorMsgLbl"></label>
+            </div>
+        </fieldset>
+
+        @Html.HiddenFor(model => model.DrugList, new { @id = "DrugList", @Name = "DrugList" })
+
+        <div class="page-container">
+            <div class="container">
+                <div class="row mt-5 mb-3 align-items-center">
+                    <div id="divFilter" class="col-md-4" style="display:none">
+                        <input type="text" class="form-control" placeholder="Search within these results..." id="searchField">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="divDrugListTable" style="display:none">
+        </div>
+    </form>
+</div>
+
+<script>
+    var table = $('#divDrugListTable').tableSortable({
+        data: aryDrugList,
+        sortingIcons: {
+            asc: '<span>&nbsp;▼</span>',
+            desc: '<span>&nbsp;▲</span>',
+        },
+        columns: columns,
+        searchField: '#searchField',
+        responsive: {
+            1100: {
+                columns: {
+                    formCode: 'Form Code',
+                    formName: 'Form Name',
+                },
+            },
+        },
+        rowsPerPage: 20,
+        pagination: true,
+        tableWillUpdate: function () { console.log('table will update') },
+        tableDidUpdate: function () { console.log('table did update') },
+        onPaginationChange: function (nextPage, setPage) {
+            setPage(nextPage);
+        }
+    });
+
+    $('#changeRows').on('change', function () {
+        table.updateRowsPerPage(parseInt($(this).val(), 10));
+    })
+
+    $('#rerender, #btnClear').click(function () {
+        table.refresh(true);
+    })
+
+    function make_ajax_call() {
+        $.ajax({
+            method: "POST",
+            url: "/Search/GetDrugList",
+            data: $("#formPDLSearch").serialize(),
+            beforeSend: function () { },
+            onsuccess: function () { },
+            success: function (result) { },
+            error: function (xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                alert(err.Message);
+            }
+        }).done(function (msg) {
+            if (msg != "") {
+                var json_data = JSON.parse(msg);
+
+                if (json_data[0].DrugName.length > 0)
+                    console.log("JSON Data Successfully Retrieved.  ex:" + json_data[0].DrugName)
+
+                if (msg.length > 5)
+                    $("#divFilter").slideDown();
+                else
+                    $("#divFilter").slideUp();
+
+                $("#divDrugListTable").slideDown();
+
+                table.setData(json_data, null, false);
+            }
+            else {
+                alert("No Data");
+            }
+        });
+    }
+
+    $("#btnSearch, #btnTest").click(function () {
+        make_ajax_call();
+    });
+
+    $(document).ready(function () {
+        //$('#NDC').mask('00000000000', { placeholder: '###########' });
+    });
+</script>
