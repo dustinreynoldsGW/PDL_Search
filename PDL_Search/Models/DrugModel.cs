@@ -1,12 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web;
-using static PDL_Search.Classes.GainwellDatabaseExtensions;
+﻿using System;
 
 namespace PDL_Search.Models
 {
